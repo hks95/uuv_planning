@@ -1,0 +1,2 @@
+model_checkpoint_path: "nov30Bmodel_weights"
+all_model_checkpoint_paths: "nov30Bmodel_weights"

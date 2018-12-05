@@ -1,0 +1,12 @@
+Starting point
+
+-14.60406087, -18.84467971,  -0.693825 
+
+Loss 2.8%
+
+Network Structure
+layer_0 = tf.layers.dense(inputs=states,units = 128,activation=tf.nn.relu)
+layer_1 = tf.layers.dense(inputs=states,units = 128,activation=tf.nn.relu)
+layer_2 = tf.layers.dense(inputs=states,units = 128,activation=tf.nn.relu)
+layer_3 = tf.layers.dense(inputs=states,units = 128,activation=tf.nn.relu)
+output = tf.layers.dense(inputs=layer_3,units = 4,activation=tf.nn.tanh)

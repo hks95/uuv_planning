@@ -1,0 +1,41 @@
+<launch>
+  <!-- <arg name="model_name" /> -->
+
+  <!-- TO DISABLE GAZEBO FROM LAUNCHING, PUT FALSE -->
+  <arg name="gui" default="true"/>
+  <arg name="uuv_name" default="rexrov"/>
+  <arg name="namespace" default="rexrov"/>
+  <arg name="joy_id" default="0"/>
+
+  <!-- LAUNCH THE ENVIRONMENT  -->
+  <include file="$(find uuv_descriptions)/launch/ocean_waves.launch">
+    <arg name="gui" value="$(arg gui)" />
+    <!-- <arg name="model_name" value="$(arg model_name)" /> -->
+  </include>
+
+  <!-- LAUNCH THE ROBOT  -->
+  <include file="$(find uuv_descriptions)/models/rexrov/launch/upload_rexrov.launch">
+    <arg name="x" value="-15" />
+    <arg name="y" value="5" />
+    <arg name="z" value="0" />
+    <arg name="yaw" default="0.0"/>
+    <arg name="namespace" value="$(arg namespace)" />
+  </include>
+
+  <!-- LAUNCH TELEOP -->
+  <include file="$(find uuv_control_cascaded_pid)/launch/joy_velocity.launch">
+    <arg name="model_name" value="$(arg uuv_name)" />
+    <arg name="joy_id" value="$(arg joy_id)" />
+    <!-- gains for teleop to be changed at uuv teleop node-->
+  </include>
+
+  <node pkg="uuv_planning"
+        type="noisy_pose"
+        name="noisy_pose"
+        output="screen">
+  </node>
+
+  <!-- Open RViz for visualization of sensor data and visualization markers -->
+  <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find uuv_gazebo)/rviz/controller_demo.rviz"/>
+
+</launch>

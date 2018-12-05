@@ -1,0 +1,94 @@
+<launch>
+  <!-- <arg name="model_name" /> -->
+
+  <!-- TO DISABLE GAZEBO FROM LAUNCHING, PUT FALSE -->
+  <arg name="gui" default="true"/>
+  <arg name="uuv_name" default="rexrov"/>
+  <arg name="namespace" default="rexrov"/>
+  <arg name="joy_id" default="0"/>
+
+    <!-- Name of the vehicle model: the name of the robot model -->
+  <arg name="model_name" default="$(arg uuv_name)"/>
+
+  <!-- Control effort saturation -->
+  <arg name="saturation" default="5000"/>
+
+  <!-- LAUNCH THE ENVIRONMENT  -->
+  <include file="$(find uuv_descriptions)/launch/ocean_waves.launch">
+    <arg name="gui" value="$(arg gui)" />
+    <!-- <arg name="model_name" value="$(arg model_name)" /> -->
+  </include>
+
+  <!-- LAUNCH THE ROBOT  -->
+  <include file="$(find uuv_descriptions)/models/rexrov/launch/upload_rexrov.launch">
+    <arg name="x" value="-10" />
+    <arg name="y" value="0" />
+    <arg name="z" value="0" />
+    <arg name="yaw" default="0.0"/>
+    <arg name="namespace" value="$(arg namespace)" />
+  </include>
+
+<!--   <include file="/home/harikrishnan/planning_ws/src/robot_localization/launch/uuv_ekf.launch">
+  </include>
+ -->
+  <arg name="output_dir" default="$(find uuv_thruster_manager)/config/$(arg model_name)"/>
+  <arg name="config_file" default="$(find uuv_thruster_manager)/config/$(arg model_name)/thruster_manager.yaml"/>
+  <arg name="tam_file" default="$(find uuv_thruster_manager)/config/$(arg model_name)/TAM.yaml"/>
+
+  <include file="$(find uuv_thruster_manager)/launch/thruster_manager.launch">
+      <!--
+      The thruster manager will use the namespace uuv_name to initialize the node and
+      will use the robot's model_name to search for the YAML file containing the thruster
+      allocation matrix.
+      -->
+      <arg name="uuv_name" value="$(arg uuv_name)"/>
+      <arg name="model_name" value="$(arg model_name)"/>
+      <arg name="output_dir" value="$(arg output_dir)"/>
+      <arg name="config_file" value="$(arg config_file)"/>
+      <arg name="tam_file" value="$(arg tam_file)"/>
+  </include>
+
+    <!--
+  It is important to start all nodes relative to this vehicle under the vehicle's
+  namespace in order to avoid errors and parameter being initialized in wrong place.
+  Most of the nodes per default are going to look for configuration parameters and
+  topics under the vehicle's namespace per default.
+  -->
+  <group ns="$(arg uuv_name)">
+      <!--
+      This node just reads the trajectory and waypoint topics and publishes visualization
+      markers to RViz, but is not essential to the controller's operation
+      -->
+      <node pkg="uuv_control_utils"
+            type="trajectory_marker_publisher.py"
+            name="trajectory_marker_publisher"
+            output="screen">
+          <remap from="trajectory" to="dp_controller/trajectory"/>
+          <remap from="waypoints" to="dp_controller/waypoints"/>
+      </node>
+
+<!-- 
+      <include file="$(find uuv_control_utils)/launch/send_waypoints_file.launch">
+          <arg name="uuv_name" value="$(arg uuv_name)"/>
+      </include> -->
+
+      <!--
+      Start the vehicle controller node. Remember to include this controller's script
+      correctly in the CMakeLists.txt file of your catkin package. This can be done by
+      adding the following line in the CMakeLists.txt after the line where catkin_package()
+      is given:
+
+      catkin_install_python(PROGRAMS scripts/tutorial_dp_controller.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+      The scripts/tutorial_dp_controller.py file must also be set as an executable as follows
+
+      >> cd <path_to_ros_package>/scripts
+      >> chmod 777 tutorial_dp_controller.py
+      -->
+      <!-- INSERT CONTROLLER HERE -->
+  </group>
+
+  <!-- Open RViz for visualization of sensor data and visualization markers -->
+  <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find uuv_gazebo)/rviz/controller_demo.rviz"/>
+
+</launch>

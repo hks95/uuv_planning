@@ -6,5 +6,7 @@
 16782 Planning and Decision-making for Robotics Project
 
 The project uses the underwater robotics simulator : https://uuvsimulator.github.io/
-Control scheme 1: Trajectory optimization using Model Predictive Control 
+
+Control scheme 1: Trajectory optimization using Model Predictive Control
+
 Control scheme 2: Imitation learning
